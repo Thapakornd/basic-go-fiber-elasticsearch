@@ -1,0 +1,6 @@
+*.vscode
+*/*.exe
+/tmp
+*.env
+go.sum
+go.mod
