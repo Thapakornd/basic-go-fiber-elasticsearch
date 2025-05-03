@@ -150,7 +150,7 @@ func (e *ElasticsearchUtil) DeleteDocumentById(index, id string) (*esapi.Respons
 	return resp, nil
 }
 
-func (e *ElasticsearchUtil) SearchDocuments[T any](index, value string, size uint, documents []T) (*esapi.Response, error) {
+func (e *ElasticsearchUtil) SearchDocuments(index, value string, size uint) ([]interface{}, error) {
 	query := map[string]interface{}{
 		"size": size,
 		"query": map[string]interface{}{
@@ -181,10 +181,11 @@ func (e *ElasticsearchUtil) SearchDocuments[T any](index, value string, size uin
 		return nil, err
 	}
 
+	var docs []interface{}
 	for _, hit := range r["hits"].(map[string]interface{})["hits"].([]interface{}) {
-		doc := hit.(map[string]interface{})
-		documents = append(documents, doc)
+		doc := hit.(map[string]interface{})["_source"]
+		docs = append(docs, doc)
 	}
 
-	return resp, nil
+	return docs, nil
 }

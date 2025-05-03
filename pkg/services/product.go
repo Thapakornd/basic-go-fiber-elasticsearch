@@ -2,13 +2,12 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 
 	"example.com/m/pkg/lib"
 	"example.com/m/pkg/models"
 	"example.com/m/pkg/repository"
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/elastic/go-elasticsearch/v9/esapi"
 	"gorm.io/gorm"
 )
 
@@ -57,15 +56,32 @@ func (ps *ProductService) GenerateFakeData() error {
 	return nil
 }
 
-func (ps *ProductService) SearchProducts(query string) (*esapi.Response, error) {
-	var documents = []models.Product{}
-	data, err := ps.elastic.SearchDocuments("products", query, 10, &documents)
+func (ps *ProductService) SearchProducts(query string) ([]*models.Product, error) {
+	docs, err := ps.elastic.SearchDocuments("products", query, 10)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("%v", data)
 
-	return data, nil
+	var result = []*models.Product{}
+	for _, doc := range docs {
+		m, ok := doc.(map[string]interface{})
+		if !ok {
+			return nil, errors.New("error: can't assert the doc type from elasticsearch")
+		}
+
+		b, err := json.Marshal(m)
+		if err != nil {
+			return nil, err
+		}
+
+		var product models.Product
+		if err := json.Unmarshal(b, &product); err != nil {
+			return nil, err
+		}
+		result = append(result, &product)
+	}
+
+	return result, nil
 }
 
 func (ps *ProductService) InsertFakeProduct() (*models.Product, error) {
