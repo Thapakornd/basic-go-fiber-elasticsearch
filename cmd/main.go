@@ -1,14 +1,14 @@
 package main
 
 import (
-	"elastic-search/pkg/lib"
-	"elastic-search/pkg/models"
-	"elastic-search/router"
 	"fmt"
 	"log"
 	"os"
 	"runtime"
 
+	"example.com/m/pkg/lib"
+	"example.com/m/pkg/models"
+	"example.com/m/router"
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"

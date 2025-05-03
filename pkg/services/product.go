@@ -1,12 +1,12 @@
 package services
 
 import (
-	"elastic-search/pkg/lib"
-	"elastic-search/pkg/models"
-	"elastic-search/pkg/repository"
 	"encoding/json"
 	"fmt"
 
+	"example.com/m/pkg/lib"
+	"example.com/m/pkg/models"
+	"example.com/m/pkg/repository"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/elastic/go-elasticsearch/v9/esapi"
 	"gorm.io/gorm"
@@ -58,7 +58,8 @@ func (ps *ProductService) GenerateFakeData() error {
 }
 
 func (ps *ProductService) SearchProducts(query string) (*esapi.Response, error) {
-	data, err := ps.elastic.SearchDocuments("products", query, 10)
+	var documents = []models.Product{}
+	data, err := ps.elastic.SearchDocuments("products", query, 10, &documents)
 	if err != nil {
 		return nil, err
 	}

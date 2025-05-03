@@ -3,13 +3,13 @@ package lib
 import (
 	"bytes"
 	"context"
-	"elastic-search/pkg/models"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"sync"
 
+	"example.com/m/pkg/models"
 	"github.com/elastic/go-elasticsearch/v9"
 	"github.com/elastic/go-elasticsearch/v9/esapi"
 	"github.com/elastic/go-elasticsearch/v9/esutil"
@@ -83,7 +83,7 @@ func (e *ElasticsearchUtil) BlukIndexDocument(documents []models.Item, index str
 
 		id := documents[i].GetID()
 		if id == "" {
-			return errors.New("Error: can't insert document due to document_id")
+			return errors.New("error: can't insert document due to document_id")
 		}
 
 		data, err := json.Marshal(documents[i])
@@ -126,7 +126,7 @@ func (e *ElasticsearchUtil) BlukIndexDocument(documents []models.Item, index str
 
 func (e *ElasticsearchUtil) UpdateDocumentById(index, id string, updatedDocument interface{}) (*esapi.Response, error) {
 	if updatedDocument == nil {
-		return nil, errors.New("Error: updatedDocument is null")
+		return nil, errors.New("error: updatedDocument is null")
 	}
 	data, err := json.Marshal(updatedDocument)
 	if err != nil {
@@ -150,14 +150,13 @@ func (e *ElasticsearchUtil) DeleteDocumentById(index, id string) (*esapi.Respons
 	return resp, nil
 }
 
-func (e *ElasticsearchUtil) SearchDocuments(index, value string, size uint) (*esapi.Response, error) {
+func (e *ElasticsearchUtil) SearchDocuments[T any](index, value string, size uint, documents []T) (*esapi.Response, error) {
 	query := map[string]interface{}{
 		"size": size,
 		"query": map[string]interface{}{
 			"match": map[string]interface{}{
 				"name": map[string]interface{}{
-					"query":     value,
-					"fuzziness": "AUTO",
+					"query": value,
 				},
 			},
 		},
@@ -170,9 +169,21 @@ func (e *ElasticsearchUtil) SearchDocuments(index, value string, size uint) (*es
 	resp, err := e.elasticClient.Search(
 		e.elasticClient.Search.WithIndex(index),
 		e.elasticClient.Search.WithBody(bytes.NewReader(queryData)),
+		e.elasticClient.Search.WithTrackTotalHits(true),
+		e.elasticClient.Search.WithPretty(),
 	)
 	if err != nil {
 		return nil, err
+	}
+
+	var r = map[string]interface{}{}
+	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
+		return nil, err
+	}
+
+	for _, hit := range r["hits"].(map[string]interface{})["hits"].([]interface{}) {
+		doc := hit.(map[string]interface{})
+		documents = append(documents, doc)
 	}
 
 	return resp, nil

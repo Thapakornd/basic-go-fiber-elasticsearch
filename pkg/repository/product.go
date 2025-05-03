@@ -2,9 +2,9 @@ package repository
 
 import (
 	"context"
-	"elastic-search/pkg/models"
 	"time"
 
+	"example.com/m/pkg/models"
 	"gorm.io/gorm"
 )
 

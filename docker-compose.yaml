@@ -8,7 +8,7 @@ services:
     ports:
       - 3301:3306
   esnode1:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
     container_name: esnode1
     environment:
       - node.name=esnode1
@@ -17,6 +17,7 @@ services:
       - discovery.seed_hosts=esnode2
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
     ulimits:
       memlock:
         soft: -1
@@ -28,7 +29,7 @@ services:
     networks:
       - elastic_network
   esnode2:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
     container_name: esnode2
     environment:
       - node.name=esnode2
@@ -37,23 +38,13 @@ services:
       - discovery.seed_hosts=esnode1
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
       - esnode2_data:/usr/share/elasticsearch/data
-    networks:
-      - elastic_network
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.14.0
-    container_name: kibana
-    environment:
-      - ELASTICSEARCH_HOSTS=http://esnode1:9200
-    ports:
-      - 5601:5601
-    depends_on:
-      - esnode1
     networks:
       - elastic_network
 volumes:

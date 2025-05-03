@@ -1,9 +1,8 @@
 package router
 
 import (
-	"elastic-search/handlers"
-	"elastic-search/pkg/lib"
-
+	"example.com/m/handlers"
+	"example.com/m/pkg/lib"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
@@ -13,6 +12,6 @@ func SetupProduct(api fiber.Router, db *gorm.DB, es *lib.ElasticsearchUtil) {
 
 	api.Group("/products").
 		Get("/init", productHandler.GenerateFakeData).
-		Post("/create", productHandler.Create)
-	// api.Get("/search", productHandler.)
+		Post("/create", productHandler.Create).
+		Get("/search", productHandler.Search)
 }

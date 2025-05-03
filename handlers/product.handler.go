@@ -1,10 +1,9 @@
 package handlers
 
 import (
-	"elastic-search/pkg/lib"
-	"elastic-search/pkg/models"
-	"elastic-search/pkg/services"
-
+	"example.com/m/pkg/lib"
+	"example.com/m/pkg/models"
+	"example.com/m/pkg/services"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
