@@ -70,3 +70,50 @@ func (ph *ProductHandler) Search(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(res)
 }
+
+func (ph *ProductHandler) Update(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		return c.Status(fiber.ErrBadRequest.Code).JSON(&fiber.Map{
+			"msg":    "id is empty",
+			"code":   40000,
+			"status": fiber.ErrBadRequest.Code,
+		})
+	}
+
+	var req models.UpdateProductRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.ErrBadRequest.Code).JSON(&fiber.Map{
+			"msg":    err.Error(),
+			"code":   40001,
+			"status": fiber.ErrBadRequest.Code,
+		})
+	}
+
+	if err := ph.productService.UpdateProduct(id, &req); err != nil {
+		return c.Status(fiber.ErrBadRequest.Code).JSON(&fiber.Map{
+			"msg":    err.Error(),
+			"code":   40002,
+			"status": fiber.ErrBadRequest.Code,
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(&fiber.Map{
+		"msg": "Update successful",
+	})
+}
+
+func (ph *ProductHandler) SoftDelete(c *fiber.Ctx) error {
+	var id = c.Params("id")
+	if err := ph.productService.SoftDeleteProduct(id); err != nil {
+		return c.Status(fiber.ErrBadRequest.Code).JSON(&fiber.Map{
+			"msg":    err.Error(),
+			"code":   50001,
+			"status": fiber.ErrBadRequest.Code,
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(&fiber.Map{
+		"msg": "Deleted successful",
+	})
+}

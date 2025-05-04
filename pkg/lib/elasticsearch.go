@@ -128,7 +128,11 @@ func (e *ElasticsearchUtil) UpdateDocumentById(index, id string, updatedDocument
 	if updatedDocument == nil {
 		return nil, errors.New("error: updatedDocument is null")
 	}
-	data, err := json.Marshal(updatedDocument)
+
+	updates := map[string]interface{}{
+		"doc": updatedDocument,
+	}
+	data, err := json.Marshal(updates)
 	if err != nil {
 		return nil, err
 	}

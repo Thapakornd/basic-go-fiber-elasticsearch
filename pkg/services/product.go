@@ -87,12 +87,13 @@ func (ps *ProductService) SearchProducts(query string) ([]*models.Product, error
 func (ps *ProductService) InsertFakeProduct() (*models.Product, error) {
 	gofakeit.Seed(0)
 
+	price := gofakeit.Uint16()
 	product := &models.Product{
 		ID:          gofakeit.UUID(),
 		Name:        gofakeit.ProductName(),
 		Category:    gofakeit.ProductCategory(),
 		Description: gofakeit.ProductDescription(),
-		Price:       gofakeit.Uint16(),
+		Price:       &price,
 	}
 	if err := ps.productRepo.Create(product); err != nil {
 		return nil, err
@@ -111,4 +112,42 @@ func (ps *ProductService) InsertFakeProduct() (*models.Product, error) {
 	}
 
 	return product, nil
+}
+
+func (ps *ProductService) UpdateProduct(id string, p *models.UpdateProductRequest) error {
+	if err := ps.productRepo.Update(id, p); err != nil {
+		return err
+	}
+
+	var productESReq = map[string]interface{}{}
+	if p.Name != nil {
+		productESReq["name"] = p.Name
+	}
+	if p.Category != nil {
+		productESReq["category"] = p.Category
+	}
+	if p.Description != nil {
+		productESReq["description"] = p.Description
+	}
+	if p.Price != nil {
+		productESReq["price"] = p.Price
+	}
+
+	if _, err := ps.elastic.UpdateDocumentById("products", id, productESReq); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (ps *ProductService) SoftDeleteProduct(id string) error {
+	if err := ps.productRepo.SoftDelete(id); err != nil {
+		return err
+	}
+
+	if _, err := ps.elastic.DeleteDocumentById("products", id); err != nil {
+		return err
+	}
+
+	return nil
 }
