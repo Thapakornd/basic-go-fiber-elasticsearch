@@ -13,7 +13,7 @@ func SetupProduct(api fiber.Router, db *gorm.DB, es *lib.ElasticsearchUtil) {
 	api.Group("/products").
 		Get("/init", productHandler.GenerateFakeData).
 		Post("/create", productHandler.Create).
-		Post("/search", productHandler.Search).
+		Get("/search", productHandler.Search).
 		Put("/update/:id", productHandler.Update).
 		Put("/delete/:id", productHandler.SoftDelete)
 }

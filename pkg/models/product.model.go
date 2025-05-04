@@ -26,7 +26,3 @@ type UpdateProductRequest struct {
 }
 
 func (ps *ProductSchema) GetID() string { return ps.ID }
-
-type ProductSearchRequest struct {
-	Query string `json:"query"`
-}

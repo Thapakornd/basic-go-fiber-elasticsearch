@@ -50,16 +50,9 @@ func (ph *ProductHandler) Create(c *fiber.Ctx) error {
 }
 
 func (ph *ProductHandler) Search(c *fiber.Ctx) error {
-	var req models.ProductSearchRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.ErrBadRequest.Code).JSON(&fiber.Map{
-			"msg":    err.Error(),
-			"code":   30001,
-			"status": fiber.ErrBadRequest.Code,
-		})
-	}
+	query := c.Query("q")
 
-	res, err := ph.productService.SearchProducts(req.Query)
+	res, err := ph.productService.SearchProducts(query)
 	if err != nil {
 		return c.Status(fiber.ErrBadRequest.Code).JSON(&fiber.Map{
 			"msg":    err.Error(),
